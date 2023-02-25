@@ -1,0 +1,72 @@
+###RICERCA
+
+import requests
+from bs4 import BeautifulSoup
+
+query = input("Inserisci la tua domanda: ")
+url = f"https://www.google.com/search?q={query}"
+
+# Aggiungiamo un header per evitare il blocco da parte di Google
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"}
+
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Estraiamo la risposta dal paragrafo di Google
+answer = soup.find_all('div', {'class': 'Z0LcW'})
+if answer:
+    print(answer[0].get_text())
+else:
+    print("Mi dispiace, non ho trovato nessuna risposta alla tua domanda.")
+    
+  ______________________________________________________________________________________________________
+###Semplice chatbotBob
+
+
+    import nltk
+nltk.download('wordnet')
+from nltk.corpus import wordnet
+import random
+import pyttsx3
+
+# Inizializzazione del motore TTS (text-to-speech)
+engine = pyttsx3.init()
+
+# Definizione delle risposte del chatbot
+responses = {
+    "ciao": ["Ciao!", "Salve!", "Buongiorno!"],
+    "come stai?": ["Sto bene, grazie!", "Tutto bene, grazie!", "Non c'è male, e tu?"],
+    "che fai?": ["Niente di particolare, e tu?", "Sto chattando con te, e tu?"],
+    "qual è il tuo nome?": ["Il mio nome è Bob!", "Mi chiamo Bob!", "Sono Bob!"],
+    "cosa fai?": ["Rispondo alle tue domande!", "Chatto con te!"],
+    "uscita": ["Arrivederci!", "Ciao ciao!", "A presto!"]
+}
+
+# Funzione per cercare i sinonimi di una parola utilizzando WordNet
+def get_synonyms(word):
+    synonyms = []
+    for syn in wordnet.synsets(word):
+        for lemma in syn.lemmas():
+            synonyms.append(lemma.name())
+    return set(synonyms)
+
+# Funzione per generare una risposta in base al messaggio dell'utente
+def generate_response(message):
+    tokens = nltk.word_tokenize(message.lower()) # Tokenizzazione del messaggio
+    for token in tokens:
+        if token in responses:
+            return random.choice(responses[token]) # Restituzione di una risposta predefinita
+        else:
+            synonyms = get_synonyms(token) # Ricerca dei sinonimi della parola
+            for synonym in synonyms:
+                if synonym in responses:
+                    return random.choice(responses[synonym]) # Restituzione di una risposta predefinita basata su un sinonimo
+    return "Mi dispiace, non ho capito. Puoi ripetere per favore?" # Risposta predefinita se non viene trovata una corrispondenza
+
+# Loop principale del chatbot
+while True:
+    message = input("Tu: ")
+    response = generate_response(message)
+    print("ChatBot:", response)
+    engine.say(response) # Pronuncia della risposta utilizzando il motore TTS
+    engine.runAndWait()
